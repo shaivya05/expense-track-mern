@@ -33,6 +33,7 @@ const handleLogin = async(e) => {
           body: JSON.stringify(loginInfo)
       });
       const result =await response.json();
+      console.log("Login Response",result);
       const { success, message,jwtToken,name ,error } = result;
       if (success) {
           handleSuccess(message);

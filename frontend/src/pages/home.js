@@ -20,22 +20,54 @@ function Home() {
         }, 1000)
     }
 
+    // const fetchProducts = async () => {
+    //     try {
+    //         const url = "https://expense-track-mern.vercel.app/auth/products";
+    //         const headers = {
+    //             headers: {
+    //                 'Authorization': localStorage.getItem('token')
+    //             }
+    //         }
+    //         const response = await fetch(url, {headers});
+    //         const result = await response.json();
+    //         console.log(result);
+    //         setProducts(result);
+    //     } catch (err) {
+    //         handleError(err);
+    //     }
+    // }
     const fetchProducts = async () => {
         try {
-            const url = "https://expense-track-mern.vercel.app/auth/products";
-            const headers = {
-                headers: {
-                    'Authorization': localStorage.getItem('token')
-                }
+            const token = localStorage.getItem('token');  // Retrieve the token
+            if (!token) {
+                console.error("No token found in localStorage");
+                handleError("User not authenticated");
+                return;
             }
-            const response = await fetch(url, {headers});
+    
+            const url = "https://expense-track-mern.vercel.app/auth/products";
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    'Authorization': `Bearer ${token}`, // ✅ Correct way to send JWT
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            if (!response.ok) {
+                console.error("Failed to fetch products:", response.status);
+                throw new Error("Unauthorized or expired token");
+            }
+    
             const result = await response.json();
-            console.log(result);
+            console.log("Fetched Products:", result);
             setProducts(result);
         } catch (err) {
-            handleError(err);
+            console.error("Error fetching products:", err);
+            handleError("Failed to fetch products. Try logging in again.");
         }
-    }
+    };
+    
     useEffect(() => {
         fetchProducts()
     }, [])

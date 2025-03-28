@@ -24,7 +24,7 @@ const handleLogin = async(e) => {
       return handleError(' email and password are required')
   }
   try {//https://expense-track-mern-api.vercel.app/welcome
-      const url = "http://localhost:8080/auth/login";
+      const url = "https://expense-track-mern.vercel.app/auth/login";
       const response = await fetch(url, {
           method: "POST",
           headers: {

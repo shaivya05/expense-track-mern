@@ -25,7 +25,7 @@ const handleSignup = async (e) => {
       return handleError('name, email and password are required')
   }
   try {
-      const url = "http://localhost:8080/auth/signup";
+      const url = "https://expense-track-mern.vercel.app/auth/signup";
       console.log("📡 Sending request to:", url);
       const response = await fetch(url, {
           method: "POST",

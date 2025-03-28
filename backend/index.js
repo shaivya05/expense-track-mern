@@ -10,6 +10,10 @@ const PORT = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
 app.use(cors());
+
+app.get('/welcome',(req,res)=>{
+   res.send('ho gayaa chaluuu')
+})
 app.use('/auth', AuthRouter);
 app.use('/products',ProductRouter);
 app.listen(PORT, () => {

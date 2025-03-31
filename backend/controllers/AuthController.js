@@ -16,8 +16,8 @@ const signup = async (req, res) => {
         }
 
         // Hash password before saving
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new UserModel({ name, email, password: hashedPassword });
+        const newUser = new UserModel({ name, email, password});
+         newUser.password = await bcrypt.hash(password, 10);
 
         await newUser.save();
         res.status(201).json({
@@ -29,7 +29,7 @@ const signup = async (req, res) => {
         res.status(500).json({
             message: "Internal server error",
             success: false
-        });
+        })
     }
 };
 
@@ -40,7 +40,7 @@ const login = async (req, res) => {
         // Find user by email
         const user = await UserModel.findOne({ email });
         if (!user) {
-            return res.status(401).json({ 
+            return res.status(403).json({ 
                 message: 'Authentication failed or wrong password', 
                 success: false 
             });
@@ -49,7 +49,7 @@ const login = async (req, res) => {
         // Compare passwords
         const isPassEqual = await bcrypt.compare(password, user.password);
         if (!isPassEqual) {
-            return res.status(401).json({ 
+            return res.status(403).json({ 
                 message: 'Authentication failed or wrong password', 
                 success: false 
             });
@@ -69,14 +69,14 @@ const login = async (req, res) => {
             jwtToken, 
             email, 
             name: user.name 
-        });
+        })
     } 
     catch (err) {
         res.status(500).json({
             message: "Internal server error",
             success: false
-        });
+        })
     }
-};
+}
 
-module.exports = { signup, login };
+module.exports = {signup, login};

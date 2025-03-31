@@ -6,7 +6,7 @@ import { ToastContainer } from 'react-toastify';
 
 function Home() {
     const [loggedInUser, setLoggedInUser] = useState('');
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState('');
     const navigate = useNavigate();
     useEffect(() => {
         setLoggedInUser(localStorage.getItem('loggedInUser'))
@@ -23,13 +23,13 @@ function Home() {
 
     const fetchProducts = async () => {
         try {
-            const url = "https://expense-track-mern.vercel.app/auth/products";
+            const url = "https://expense-track-mern.vercel.app/products";
             const headers = {
                 headers: {
                     'Authorization': localStorage.getItem('token')
                 }
             }
-            const response = await fetch(url, {headers});
+            const response = await fetch(url, headers);
             const result = await response.json();
             console.log(result);
             setProducts(result);
@@ -47,17 +47,15 @@ function Home() {
         <div>
             <h1>Welcome {loggedInUser}</h1>
             <button onClick={handleLogout}>Logout</button>
-            <div>you are lucky </div>
+            
             <div>
-            {products.length > 0 ? (
-                    products.map((item, index) => (
+                {
+                    products && products?.map((item, index) => (
                         <ul key={index}>
                             <span>{item.name} : {item.price}</span>
                         </ul>
                     ))
-                ) : (
-                    <p>No products available</p>
-                )}
+                }
             </div>
             <ToastContainer />
         </div>

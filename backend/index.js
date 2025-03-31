@@ -6,6 +6,8 @@ require('dotenv').config();
 require('./models/db');
 const AuthRouter = require('./routes/AuthRouter');
 const ProductRouter=require('./routes/ProductRouter');
+const ExpenseRouter=require('./routes/ExpenseRouter');
+const ensureAuth=require('./middlewares/Auth');
 const PORT = process.env.PORT || 8080;
 
 app.use(bodyParser.json());
@@ -16,6 +18,7 @@ app.get('/welcome',(req,res)=>{
 })
 app.use('/auth', AuthRouter);
 app.use('/products',ProductRouter);
+app.use('/expenses',ensureAuth,ExpenseRouter);
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`)
 })

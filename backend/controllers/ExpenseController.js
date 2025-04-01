@@ -9,7 +9,7 @@ const addExpenses=async (req,res)=>{
                 $push:{expenses:body}
             },
             {
-                new:true
+                new:true//for returning the updated document
             });
             return res.status(200).json({
                 message:'Expense added succesfuly',

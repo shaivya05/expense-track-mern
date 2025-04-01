@@ -1,13 +1,19 @@
-//rfceg
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { handleError, handleSuccess } from '../utils';
+import { APIUrl, handleError, handleSuccess } from '../utils';
 import { ToastContainer } from 'react-toastify';
+import ExpenseTable from './ExpensesTable';
+import ExpenseDetails from './ExpenseDetails';
+import ExpenseForm from './ExpenseTrackerForm';
 
 function Home() {
     const [loggedInUser, setLoggedInUser] = useState('');
-    const [products, setProducts] = useState('');
+    const [expenses, setExpenses] = useState([]);
+    const [incomeAmt, setIncomeAmt] = useState(0);
+    const [expenseAmt, setExpenseAmt] = useState(0);
+
     const navigate = useNavigate();
+
     useEffect(() => {
         setLoggedInUser(localStorage.getItem('loggedInUser'))
     }, [])
@@ -20,43 +26,114 @@ function Home() {
             navigate('/login');
         }, 1000)
     }
+    useEffect(() => {
+        const amounts = expenses.map(item => item.amount);
+        const income = amounts.filter(item => item > 0)
+            .reduce((acc, item) => (acc += item), 0);
+        const exp = amounts.filter(item => item < 0)
+            .reduce((acc, item) => (acc += item), 0) * -1;
+        setIncomeAmt(income);
+        setExpenseAmt(exp);
+    }, [expenses])
 
-    const fetchProducts = async () => {
+    const  deleteExpens = async (id) => {
         try {
-            const url = "https://expense-track-mern.vercel.app/products";
+            const url = `https://expense-track-mern.vercel.app/expenses/${id}`;
+        
+            const headers = {
+                headers: {
+                    'Authorization': localStorage.getItem('token')
+                },
+                method: "DELETE"
+            }
+            const response = await fetch(url, headers);
+    
+            if (response.status === 403) {
+                localStorage.removeItem('token');
+                navigate('/login');
+                return
+            }
+            const result = await response.json();
+            handleSuccess(result?.message)
+            console.log('--result', result.data);
+            setExpenses(result.data);
+        } catch (err) {
+            handleError(err);
+        }
+    }
+
+    const fetchExpenses = async () => {
+        try {
+            const url = "https://expense-track-mern.vercel.app/auth/expenses";
             const headers = {
                 headers: {
                     'Authorization': localStorage.getItem('token')
                 }
             }
             const response = await fetch(url, headers);
+            if (response.status === 403) {
+                localStorage.removeItem('token');
+                navigate('/login');
+                return
+            }
             const result = await response.json();
-            console.log(result);
-            setProducts(result);
+            console.log('--result', result.data);
+            setExpenses(result.data);
         } catch (err) {
             handleError(err);
         }
     }
-    
-    
+
+
+
+    const addTransaction = async (data) => {
+        try {
+            const url = "https://expense-track-mern.vercel.app/auth/expenses";
+            const headers = {
+                headers: {
+                    'Authorization': localStorage.getItem('token'),
+                    'Content-Type': 'application/json'
+                },
+                method: "POST",
+                body: JSON.stringify(data)
+            }
+            const response = await fetch(url, headers);
+            if (response.status === 403) {
+                localStorage.removeItem('token');
+                navigate('/login');
+                return
+            }
+            const result = await response.json();
+            handleSuccess(result?.message)
+            console.log('--result', result.data);
+            setExpenses(result.data);
+        } catch (err) {
+            handleError(err);
+        }
+    }
+
     useEffect(() => {
-        fetchProducts()
+        fetchExpenses()
     }, [])
 
     return (
         <div>
-            <h1>Welcome {loggedInUser}</h1>
-            <button onClick={handleLogout}>Logout</button>
-            
-            <div>
-                {
-                    products && products?.map((item, index) => (
-                        <ul key={index}>
-                            <span>{item.name} : {item.price}</span>
-                        </ul>
-                    ))
-                }
+            <div className='user-section'>
+                <h1>Welcome {loggedInUser}</h1>
+                <button onClick={handleLogout}>Logout</button>
             </div>
+            <ExpenseDetails
+                incomeAmt={incomeAmt}
+                expenseAmt={expenseAmt}
+            />
+
+            <ExpenseForm
+                addTransaction={addTransaction} />
+
+            <ExpenseTable
+                expenses={expenses}
+                deleteExpens={deleteExpens}
+            />
             <ToastContainer />
         </div>
     )
